@@ -1,0 +1,26 @@
+### User exists and entered correct credentials
+POST http://localhost:8080/users/sign-in
+Content-Type: application/json
+
+{
+  "email": "admin@shivamnagpal.dev",
+  "password": "Test@123"
+}
+
+### User exists and entered incorrect credentials
+POST http://localhost:8080/users/sign-in
+Content-Type: application/json
+
+{
+  "email": "admin@shivamnagpal.dev",
+  "password": "1234567"
+}
+
+### User doesn't exists
+POST http://localhost:8080/users/sign-in
+Content-Type: application/json
+
+{
+  "email": "spam@shivamnagpal.dev",
+  "password": "1234567"
+}
