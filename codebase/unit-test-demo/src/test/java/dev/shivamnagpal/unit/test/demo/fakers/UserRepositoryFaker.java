@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class UserRepositoryFaker implements UserRepository {
-    private static final List<User> users = List.of(
+    private final List<User> users = List.of(
             User.builder()
                     .id(1234L)
                     .firstName("John")
@@ -20,7 +20,7 @@ public class UserRepositoryFaker implements UserRepository {
                     .build()
     );
 
-    private static final Map<String, User> userMap = users.stream()
+    private final Map<String, User> userMap = users.stream()
             .collect(Collectors.toMap(User::getEmail, Function.identity()));
 
     @Override

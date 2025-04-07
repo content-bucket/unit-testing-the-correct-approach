@@ -1,8 +1,11 @@
 package dev.shivamnagpal.unit.test.demo;
 
+import dev.shivamnagpal.unit.test.demo.constants.Constants;
+import dev.shivamnagpal.unit.test.demo.dtos.kafka.outputs.UserSignInEvent;
 import dev.shivamnagpal.unit.test.demo.dtos.web.inputs.UserSignInRequest;
 import dev.shivamnagpal.unit.test.demo.dtos.web.outputs.UserSignInResponse;
 import dev.shivamnagpal.unit.test.demo.dtos.web.outputs.wrapper.ErrorResponse;
+import dev.shivamnagpal.unit.test.demo.enums.SignInEventType;
 import dev.shivamnagpal.unit.test.demo.exceptions.RestException;
 import dev.shivamnagpal.unit.test.demo.fakers.KafkaManagerFaker;
 import dev.shivamnagpal.unit.test.demo.fakers.UserRepositoryFaker;
@@ -16,6 +19,8 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+
+import java.util.List;
 
 class UserSignInTest {
     private final UserSignInDataFactory userSignInDataFactory = new UserSignInDataFactory();
@@ -47,10 +52,45 @@ class UserSignInTest {
                 .isNotNull()
                 .matches(s -> s.startsWith("1234"));
 
+        long expectedUserId = 1234L;
         Assertions.assertThat(userSignInResponse)
                 .extracting(UserSignInResponse::getId)
                 .isNotNull()
-                .isEqualTo(1234L);
+                .isEqualTo(expectedUserId);
+
+        List<KafkaManagerFaker.KafkaRecord> sentKafkaRecords = kafkaManager.getSentKafkaRecords();
+        KafkaManagerFaker.KafkaRecord sentKafkaRecord = Assertions.assertThat(sentKafkaRecords)
+                .isNotNull()
+                .hasSize(1)
+                .element(0)
+                .actual();
+
+        Assertions.assertThat(sentKafkaRecord)
+                .isNotNull()
+                .extracting(KafkaManagerFaker.KafkaRecord::topic)
+                .isEqualTo(Constants.USER_SIGN_IN_EVENT);
+
+        UserSignInEvent signInEvent = Assertions.assertThat(sentKafkaRecord)
+                .extracting(KafkaManagerFaker.KafkaRecord::message)
+                .isNotNull()
+                .isExactlyInstanceOf(UserSignInEvent.class)
+                .asInstanceOf(InstanceOfAssertFactories.type(UserSignInEvent.class))
+                .actual();
+
+        Assertions.assertThat(signInEvent)
+                .extracting(UserSignInEvent::getType)
+                .isNotNull()
+                .isEqualTo(SignInEventType.SIGN_IN_SUCCESSFUL);
+
+        Assertions.assertThat(signInEvent)
+                .extracting(UserSignInEvent::getEmail)
+                .isNotNull()
+                .isEqualTo(signInRequest.getEmail());
+
+        Assertions.assertThat(signInEvent)
+                .extracting(UserSignInEvent::getUserId)
+                .isNotNull()
+                .isEqualTo(expectedUserId);
     }
 
     @Test
@@ -81,6 +121,39 @@ class UserSignInTest {
                                 .isEqualTo("Invalid Credentials")
                 );
 
+        List<KafkaManagerFaker.KafkaRecord> sentKafkaRecords = kafkaManager.getSentKafkaRecords();
+        KafkaManagerFaker.KafkaRecord sentKafkaRecord = Assertions.assertThat(sentKafkaRecords)
+                .isNotNull()
+                .hasSize(1)
+                .element(0)
+                .actual();
+
+        Assertions.assertThat(sentKafkaRecord)
+                .isNotNull()
+                .extracting(KafkaManagerFaker.KafkaRecord::topic)
+                .isEqualTo(Constants.USER_SIGN_IN_EVENT);
+
+        UserSignInEvent signInEvent = Assertions.assertThat(sentKafkaRecord)
+                .extracting(KafkaManagerFaker.KafkaRecord::message)
+                .isNotNull()
+                .isExactlyInstanceOf(UserSignInEvent.class)
+                .asInstanceOf(InstanceOfAssertFactories.type(UserSignInEvent.class))
+                .actual();
+
+        Assertions.assertThat(signInEvent)
+                .extracting(UserSignInEvent::getType)
+                .isNotNull()
+                .isEqualTo(SignInEventType.INVALID_PASSWORD);
+
+        Assertions.assertThat(signInEvent)
+                .extracting(UserSignInEvent::getEmail)
+                .isNotNull()
+                .isEqualTo(signInRequest.getEmail());
+
+        Assertions.assertThat(signInEvent)
+                .extracting(UserSignInEvent::getUserId)
+                .isNotNull()
+                .isEqualTo(1234L);
     }
 
     @Test
@@ -111,5 +184,37 @@ class UserSignInTest {
                                 .isEqualTo("Invalid Credentials")
                 );
 
+        List<KafkaManagerFaker.KafkaRecord> sentKafkaRecords = kafkaManager.getSentKafkaRecords();
+        KafkaManagerFaker.KafkaRecord sentKafkaRecord = Assertions.assertThat(sentKafkaRecords)
+                .isNotNull()
+                .hasSize(1)
+                .element(0)
+                .actual();
+
+        Assertions.assertThat(sentKafkaRecord)
+                .isNotNull()
+                .extracting(KafkaManagerFaker.KafkaRecord::topic)
+                .isEqualTo(Constants.USER_SIGN_IN_EVENT);
+
+        UserSignInEvent signInEvent = Assertions.assertThat(sentKafkaRecord)
+                .extracting(KafkaManagerFaker.KafkaRecord::message)
+                .isNotNull()
+                .isExactlyInstanceOf(UserSignInEvent.class)
+                .asInstanceOf(InstanceOfAssertFactories.type(UserSignInEvent.class))
+                .actual();
+
+        Assertions.assertThat(signInEvent)
+                .extracting(UserSignInEvent::getType)
+                .isNotNull()
+                .isEqualTo(SignInEventType.USER_NOT_FOUND);
+
+        Assertions.assertThat(signInEvent)
+                .extracting(UserSignInEvent::getEmail)
+                .isNotNull()
+                .isEqualTo(signInRequest.getEmail());
+
+        Assertions.assertThat(signInEvent)
+                .extracting(UserSignInEvent::getUserId)
+                .isNull();
     }
 }
