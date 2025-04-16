@@ -1,7 +1,7 @@
 package dev.shivamnagpal.unit.test.demo;
 
 import dev.shivamnagpal.unit.test.demo.constants.Constants;
-import dev.shivamnagpal.unit.test.demo.dtos.kafka.outputs.UserSignInEvent;
+import dev.shivamnagpal.unit.test.demo.dtos.kafka.outputs.UserSignInEventOutput;
 import dev.shivamnagpal.unit.test.demo.dtos.web.inputs.UserSignInRequest;
 import dev.shivamnagpal.unit.test.demo.dtos.web.outputs.UserSignInResponse;
 import dev.shivamnagpal.unit.test.demo.dtos.web.outputs.wrapper.ErrorResponse;
@@ -9,6 +9,7 @@ import dev.shivamnagpal.unit.test.demo.enums.SignInEventType;
 import dev.shivamnagpal.unit.test.demo.exceptions.RestException;
 import dev.shivamnagpal.unit.test.demo.fakers.KafkaManagerFaker;
 import dev.shivamnagpal.unit.test.demo.fakers.UserRepositoryFaker;
+import dev.shivamnagpal.unit.test.demo.fakers.UserSignInEventRepositoryFaker;
 import dev.shivamnagpal.unit.test.demo.helpers.impl.PasswordHelperImpl;
 import dev.shivamnagpal.unit.test.demo.helpers.impl.TokenHelperImpl;
 import dev.shivamnagpal.unit.test.demo.helpers.impl.UserHelperImpl;
@@ -29,13 +30,20 @@ class UserSignInTest {
 
     private final KafkaManagerFaker kafkaManager = new KafkaManagerFaker();
 
-    private final UserHelperImpl userHelper = new UserHelperImpl(userRepositoryFaker, kafkaManager);
+    private final UserTransformer userTransformer = new UserTransformer();
+
+    private final UserSignInEventRepositoryFaker userSignInEventRepository = new UserSignInEventRepositoryFaker();
+
+    private final UserHelperImpl userHelper = new UserHelperImpl(
+            userRepositoryFaker,
+            userSignInEventRepository,
+            kafkaManager,
+            userTransformer
+    );
 
     private final PasswordHelperImpl passwordHelper = new PasswordHelperImpl();
 
     private final TokenHelperImpl tokenHelper = new TokenHelperImpl();
-
-    private final UserTransformer userTransformer = new UserTransformer();
 
     private final UserService userService = new UserServiceImpl(
             userHelper, passwordHelper, tokenHelper, userTransformer
@@ -70,25 +78,25 @@ class UserSignInTest {
                 .extracting(KafkaManagerFaker.KafkaRecord::topic)
                 .isEqualTo(Constants.USER_SIGN_IN_EVENT);
 
-        UserSignInEvent signInEvent = Assertions.assertThat(sentKafkaRecord)
+        UserSignInEventOutput signInEvent = Assertions.assertThat(sentKafkaRecord)
                 .extracting(KafkaManagerFaker.KafkaRecord::message)
                 .isNotNull()
-                .isExactlyInstanceOf(UserSignInEvent.class)
-                .asInstanceOf(InstanceOfAssertFactories.type(UserSignInEvent.class))
+                .isExactlyInstanceOf(UserSignInEventOutput.class)
+                .asInstanceOf(InstanceOfAssertFactories.type(UserSignInEventOutput.class))
                 .actual();
 
         Assertions.assertThat(signInEvent)
-                .extracting(UserSignInEvent::getType)
+                .extracting(UserSignInEventOutput::getType)
                 .isNotNull()
                 .isEqualTo(SignInEventType.SIGN_IN_SUCCESSFUL);
 
         Assertions.assertThat(signInEvent)
-                .extracting(UserSignInEvent::getEmail)
+                .extracting(UserSignInEventOutput::getEmail)
                 .isNotNull()
                 .isEqualTo(signInRequest.getEmail());
 
         Assertions.assertThat(signInEvent)
-                .extracting(UserSignInEvent::getUserId)
+                .extracting(UserSignInEventOutput::getUserId)
                 .isNotNull()
                 .isEqualTo(expectedUserId);
     }
@@ -133,25 +141,25 @@ class UserSignInTest {
                 .extracting(KafkaManagerFaker.KafkaRecord::topic)
                 .isEqualTo(Constants.USER_SIGN_IN_EVENT);
 
-        UserSignInEvent signInEvent = Assertions.assertThat(sentKafkaRecord)
+        UserSignInEventOutput signInEvent = Assertions.assertThat(sentKafkaRecord)
                 .extracting(KafkaManagerFaker.KafkaRecord::message)
                 .isNotNull()
-                .isExactlyInstanceOf(UserSignInEvent.class)
-                .asInstanceOf(InstanceOfAssertFactories.type(UserSignInEvent.class))
+                .isExactlyInstanceOf(UserSignInEventOutput.class)
+                .asInstanceOf(InstanceOfAssertFactories.type(UserSignInEventOutput.class))
                 .actual();
 
         Assertions.assertThat(signInEvent)
-                .extracting(UserSignInEvent::getType)
+                .extracting(UserSignInEventOutput::getType)
                 .isNotNull()
                 .isEqualTo(SignInEventType.INVALID_PASSWORD);
 
         Assertions.assertThat(signInEvent)
-                .extracting(UserSignInEvent::getEmail)
+                .extracting(UserSignInEventOutput::getEmail)
                 .isNotNull()
                 .isEqualTo(signInRequest.getEmail());
 
         Assertions.assertThat(signInEvent)
-                .extracting(UserSignInEvent::getUserId)
+                .extracting(UserSignInEventOutput::getUserId)
                 .isNotNull()
                 .isEqualTo(1234L);
     }
@@ -196,25 +204,25 @@ class UserSignInTest {
                 .extracting(KafkaManagerFaker.KafkaRecord::topic)
                 .isEqualTo(Constants.USER_SIGN_IN_EVENT);
 
-        UserSignInEvent signInEvent = Assertions.assertThat(sentKafkaRecord)
+        UserSignInEventOutput signInEvent = Assertions.assertThat(sentKafkaRecord)
                 .extracting(KafkaManagerFaker.KafkaRecord::message)
                 .isNotNull()
-                .isExactlyInstanceOf(UserSignInEvent.class)
-                .asInstanceOf(InstanceOfAssertFactories.type(UserSignInEvent.class))
+                .isExactlyInstanceOf(UserSignInEventOutput.class)
+                .asInstanceOf(InstanceOfAssertFactories.type(UserSignInEventOutput.class))
                 .actual();
 
         Assertions.assertThat(signInEvent)
-                .extracting(UserSignInEvent::getType)
+                .extracting(UserSignInEventOutput::getType)
                 .isNotNull()
                 .isEqualTo(SignInEventType.USER_NOT_FOUND);
 
         Assertions.assertThat(signInEvent)
-                .extracting(UserSignInEvent::getEmail)
+                .extracting(UserSignInEventOutput::getEmail)
                 .isNotNull()
                 .isEqualTo(signInRequest.getEmail());
 
         Assertions.assertThat(signInEvent)
-                .extracting(UserSignInEvent::getUserId)
+                .extracting(UserSignInEventOutput::getUserId)
                 .isNull();
     }
 }

@@ -1,9 +1,10 @@
 package dev.shivamnagpal.unit.test.demo.transformers;
 
-import dev.shivamnagpal.unit.test.demo.dtos.kafka.outputs.UserSignInEvent;
+import dev.shivamnagpal.unit.test.demo.dtos.kafka.outputs.UserSignInEventOutput;
 import dev.shivamnagpal.unit.test.demo.dtos.web.outputs.UserSignInResponse;
 import dev.shivamnagpal.unit.test.demo.enums.SignInEventType;
 import dev.shivamnagpal.unit.test.demo.models.User;
+import dev.shivamnagpal.unit.test.demo.models.UserSignInEvent;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,6 +36,14 @@ public class UserTransformer {
         return UserSignInEvent.builder()
                 .type(SignInEventType.USER_NOT_FOUND)
                 .email(email)
+                .build();
+    }
+
+    public UserSignInEventOutput convertToUserSignInEventOutput(UserSignInEvent userSignInEvent) {
+        return UserSignInEventOutput.builder()
+                .type(userSignInEvent.getType())
+                .userId(userSignInEvent.getUserId())
+                .email(userSignInEvent.getEmail())
                 .build();
     }
 }

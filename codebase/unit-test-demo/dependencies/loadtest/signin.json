@@ -1,0 +1,13 @@
+[
+  {
+    "method": "POST",
+    "endpoint": "/users/sign-in",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "payload": {
+      "email": "admin@shivamnagpal.dev",
+      "password": "Test@123"
+    }
+  }
+]

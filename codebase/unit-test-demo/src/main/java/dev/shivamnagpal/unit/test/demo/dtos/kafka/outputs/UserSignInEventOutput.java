@@ -16,7 +16,7 @@ import lombok.Setter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserSignInEvent implements JsonSerializable {
+public class UserSignInEventOutput implements JsonSerializable {
     private SignInEventType type;
 
     private Long userId;

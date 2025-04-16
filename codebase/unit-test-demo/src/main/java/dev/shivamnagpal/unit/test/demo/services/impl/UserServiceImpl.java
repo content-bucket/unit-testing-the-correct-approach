@@ -1,6 +1,5 @@
 package dev.shivamnagpal.unit.test.demo.services.impl;
 
-import dev.shivamnagpal.unit.test.demo.dtos.kafka.outputs.UserSignInEvent;
 import dev.shivamnagpal.unit.test.demo.dtos.web.inputs.UserSignInRequest;
 import dev.shivamnagpal.unit.test.demo.dtos.web.outputs.UserSignInResponse;
 import dev.shivamnagpal.unit.test.demo.dtos.web.outputs.wrapper.ErrorResponse;
@@ -10,6 +9,7 @@ import dev.shivamnagpal.unit.test.demo.helpers.PasswordHelper;
 import dev.shivamnagpal.unit.test.demo.helpers.TokenHelper;
 import dev.shivamnagpal.unit.test.demo.helpers.UserHelper;
 import dev.shivamnagpal.unit.test.demo.models.User;
+import dev.shivamnagpal.unit.test.demo.models.UserSignInEvent;
 import dev.shivamnagpal.unit.test.demo.services.UserService;
 import dev.shivamnagpal.unit.test.demo.transformers.UserTransformer;
 import org.springframework.http.HttpStatus;

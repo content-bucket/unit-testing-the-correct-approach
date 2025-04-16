@@ -34,5 +34,46 @@ services:
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
 
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: ../../
+    depends_on:
+      - kafka
+      - postgres
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1000M
+        reservations:
+          cpus: '1.0'
+          memory: 1000M
+    environment:
+      - SPRING_PROFILES_ACTIVE=local-docker
+    profiles:
+      - app
+      - loadtest
+
+  locust-master:
+    build: ../../dependencies/loadtest
+    depends_on:
+      - app
+    ports:
+      - "8089:8089"
+    command: locust --master
+    profiles:
+      - loadtest
+
+  locust-worker:
+    build: ../../dependencies/loadtest
+    command: locust --worker --master-host locust-master
+    depends_on:
+      - locust-master
+    profiles:
+      - loadtest
+
 volumes:
   postgres_data_container:
